@@ -97,7 +97,7 @@ function Runner() {
             if (self.tasks.length > 0) {
                 __runDependency(0);
             } else {
-                let response = `No ${configFileOrObject} to process!`;
+                let response = `No ${JSON.stringify(configFileOrObject)} to process!`;
                 if (self.callback) {
                     self.callback(null, response);
                 }
