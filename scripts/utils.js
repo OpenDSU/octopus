@@ -57,7 +57,7 @@ module.exports.readLatestTagFromRepo = function (targetFolder) {
 		//we ignore on purpose any errors durring git fetch
 	}
 	console.log("Reading latest tag");
-	let out = child_process.execSync("git for-each-ref refs/tags --sort=-taggerdate --format='%(refname:short)' --count=1", {cwd: targetFolder, stdio: 'pipe'}).toString().trim();
+	let out = child_process.execSync("git for-each-ref refs/tags --sort=-creatordate --format='%(refname:short)' --count=1", {cwd: targetFolder, stdio: 'pipe'}).toString().trim();
 	let tagRegex = /[vV]+[0-9]+.[0-9]+[.0-9]*/gm;
 	if (out) {
 		console.log(`Read tag <${out}> as latest tag`);
@@ -193,7 +193,7 @@ module.exports.getCommitDate = function (targetFolder, sha) {
 }
 
 module.exports.getTagDate = function (targetFolder, tag) {
-	let out = child_process.execSync(`git tag --list '${tag}' --format '%(taggerdate:raw)'`, {cwd: targetFolder}).toString().trim();
+	let out = child_process.execSync(`git tag --list '${tag}' --format '%(creatordate:raw)'`, {cwd: targetFolder}).toString().trim();
 	if (out) {
 		out = out.split(" ");
 		out.pop();
