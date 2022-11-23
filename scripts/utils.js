@@ -129,7 +129,7 @@ module.exports.incrementTag = async function (tag) {
 }
 
 module.exports.getCommitForTag = function (targetFolder, tag) {
-	const cmd = `git rev-parse ${tag}`;
+	const cmd = `git rev-list -n 1 ${tag}`;
 	console.log("Executing cmd", cmd, "in target folder", targetFolder);
 	let out;
 	try{
