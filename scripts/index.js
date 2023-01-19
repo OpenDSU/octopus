@@ -17,6 +17,40 @@ function createBasicConfig(...configParts) {
 	return {"workDir": ".", "dependencies": [...configParts]};
 }
 
+function prepareConfigForExecutionByUpdatingVariables(config){
+
+	if(typeof config === "object"){
+		//we ensure that the config is string
+		config = JSON.stringify(config);
+	}
+
+	let variableRegex = /{{\$\w*\W*}}/gm;
+	let matches;
+
+	let variables = {};
+	while ((matches = variableRegex.exec(config)) !== null) {
+		if (matches.index === variableRegex.lastIndex) {
+			variableRegex.lastIndex++;
+		}
+
+		matches.forEach((placeholder, groupIndex) => {
+			if(!variables[placeholder]){
+				let variable = placeholder.replace(/[(?:{{$)]|[(?:}})]/gm, "");
+				variables[placeholder] = variable;
+			}
+		});
+	}
+
+	for(let placeholder of Object.keys(variables)){
+		let variable = variables[placeholder];
+		let value = typeof process.env[variable] === "undefined" ? "" : process.env[variable];
+		config = config.replaceAll(placeholder, value);
+	}
+
+	//because we expect the config to be ready to be executed we convert to object from string before returning
+	return JSON.parse(config);
+}
+
 function readConfig() {
 	let config;
 	let configFileName = getConfigFile();
@@ -83,6 +117,8 @@ function runConfig(config, tasksListSelector, callback) {
 
 	const runner = require("../Runner");
 
+	let originalConfig = config;
+	config = prepareConfigForExecutionByUpdatingVariables(config);
 	runner.run(config, tasksListSelector, callback);
 }
 
