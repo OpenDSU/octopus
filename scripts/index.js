@@ -117,7 +117,6 @@ function runConfig(config, tasksListSelector, callback) {
 
 	const runner = require("../Runner");
 
-	let originalConfig = config;
 	config = prepareConfigForExecutionByUpdatingVariables(config);
 	runner.run(config, tasksListSelector, callback);
 }
