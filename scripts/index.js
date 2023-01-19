@@ -24,7 +24,7 @@ function prepareConfigForExecutionByUpdatingVariables(config){
 		config = JSON.stringify(config);
 	}
 
-	let variableRegex = /{{\$\w*\W*}}/gm;
+	let variableRegex = /\${\w*\W*}/gm;
 	let matches;
 
 	let variables = {};
@@ -35,7 +35,7 @@ function prepareConfigForExecutionByUpdatingVariables(config){
 
 		matches.forEach((placeholder, groupIndex) => {
 			if(!variables[placeholder]){
-				let variable = placeholder.replace(/[(?:{{$)]|[(?:}})]/gm, "");
+				let variable = placeholder.replace(/[(?:\${)]|[(?:})]/gm, "");
 				variables[placeholder] = variable;
 			}
 		});

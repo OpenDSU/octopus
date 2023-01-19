@@ -258,83 +258,89 @@ function ActionsRegistry() {
 
             basicProcOptions = {cwd: path.resolve(target), stdio: [0, "pipe", "pipe"]};
 
-            child_process.exec("git remote -v", basicProcOptions, function (err, stdout, stderr) {
-                let next = true;
+            child_process.exec("git remote", basicProcOptions, function (err, remoteName) {
                 if (err) {
-                    console.log(err);
-                } else {
-                    let originFetchRegex = new RegExp('^[origin]*\\s*' + src + '[.git]*\\s*\\(fetch\\)', 'g');
-                    let matchedArr = stdout.match(originFetchRegex)
-                    if (!matchedArr) {
-                        throw new Error(`Different remotes found on repo ${target}`);
-                    }
+                    throw err;
+                }
 
-                    try {
-                        //A. Stash it
-                        try {
-                            child_process.execSync("git stash", basicProcOptions);
-                        } catch (err) {
-                            console.log(err);
+                child_process.exec(`git remote get-url ${remoteName}`, basicProcOptions, function (err, currentRemoteUrl) {
+                    let next = true;
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        currentRemoteUrl = currentRemoteUrl.replaceAll("\n", "");
+                        if (currentRemoteUrl.toLowerCase() !== src.toLowerCase()) {
+                            console.log(`Different remotes found on repo ${target}. Initial was: ${currentRemoteUrl} Current is: ${src}`);
+                            throw new Error('Remotes url conflict detected!');
                         }
 
-                        //B. Pull
-                        if (typeof action.commit !== "undefined") { //We have a commit no
-                            /**
-                             * The pull is nothing that a fetch + checkout
-                             */
-
-                                //1 - Fetch
-                            let remote = src;
-                            let commitNo = action.commit;
-                            //let repoName = dependency.name;
-
-                            let cmdFetch = 'git fetch ' + remote + ' --depth=1 ' + commitNo;
+                        try {
+                            //A. Stash it
                             try {
-                                let fetchResultLog = child_process.execSync(cmdFetch, {cwd: path.resolve(target)} /*basicProcOptions*/).toString();
-                                console.log("Result of fetching of version", changeSet, fetchResultLog);
+                                child_process.execSync("git stash", basicProcOptions);
                             } catch (err) {
                                 console.log(err);
                             }
 
-                            //2 - Checkout
-                            let cmdCheckout = 'git checkout ' + commitNo;
-                            try {
-                                let checkoutResultLog = child_process.execSync(cmdCheckout, {cwd: path.resolve(target)} /*, basicProcOptions*/).toString();
-                                console.log("Result of checkout of version", changeSet, checkoutResultLog);
-                            } catch (err) {
-                                console.log(err);
-                            }
-                        } else { //no commit no => classic pull
-                            let pullResult = child_process.execSync("git pull", basicProcOptions);
-                            pullResult = pullResult.toString();
-                            if (pullResult.indexOf("Already up-to-date") === -1) {
+                            //B. Pull
+                            if (typeof action.commit !== "undefined") { //We have a commit no
+                                /**
+                                 * The pull is nothing that a fetch + checkout
+                                 */
+
+                                    //1 - Fetch
+                                let remote = src;
+                                let commitNo = action.commit;
+                                //let repoName = dependency.name;
+
+                                let cmdFetch = 'git fetch ' + remote + ' --depth=1 ' + commitNo;
                                 try {
-                                    //console.log("pullResult", pullResult.indexOf("Already up-to-date"));
-                                    let log = child_process.execSync("git log --max-count=1", basicProcOptions).toString().split("\n").slice(4).join("\n");
-                                    fs.appendFileSync(changeSet, log);
+                                    let fetchResultLog = child_process.execSync(cmdFetch, {cwd: path.resolve(target)} /*basicProcOptions*/).toString();
+                                    console.log("Result of fetching of version", changeSet, fetchResultLog);
                                 } catch (err) {
                                     console.log(err);
                                 }
+
+                                //2 - Checkout
+                                let cmdCheckout = 'git checkout ' + commitNo;
+                                try {
+                                    let checkoutResultLog = child_process.execSync(cmdCheckout, {cwd: path.resolve(target)} /*, basicProcOptions*/).toString();
+                                    console.log("Result of checkout of version", changeSet, checkoutResultLog);
+                                } catch (err) {
+                                    console.log(err);
+                                }
+                            } else { //no commit no => classic pull
+                                let pullResult = child_process.execSync("git pull", basicProcOptions);
+                                pullResult = pullResult.toString();
+                                if (pullResult.indexOf("Already up-to-date") === -1) {
+                                    try {
+                                        //console.log("pullResult", pullResult.indexOf("Already up-to-date"));
+                                        let log = child_process.execSync("git log --max-count=1", basicProcOptions).toString().split("\n").slice(4).join("\n");
+                                        fs.appendFileSync(changeSet, log);
+                                    } catch (err) {
+                                        console.log(err);
+                                    }
+                                }
+                            }
+
+                            //C. Apply stash
+                            let finalResult = child_process.execSync("git stash apply", basicProcOptions);
+                            if (finalResult.indexOf("Unmerged") !== -1) {
+                                callback(new Error(`Repo ${target} needs attention! (Merging issues)`), `Finished update action on dependency ${dependency.name}`)
+                            }
+                        } catch (err) {
+                            if (err.message.indexOf("No stash") !== -1) {
+                                //ignore
+                            } else {
+                                console.log("\n\ngit pull process failed! Usualy there is a merge issue. Please resolve conflicts and try again.\n\n");
+                                callback(err);
+                                return;
                             }
                         }
-
-                        //C. Apply stash
-                        let finalResult = child_process.execSync("git stash apply", basicProcOptions);
-                        if (finalResult.indexOf("Unmerged") !== -1) {
-                            callback(new Error(`Repo ${target} needs attention! (Merging issues)`), `Finished update action on dependency ${dependency.name}`)
-                        }
-                    } catch (err) {
-                        if (err.message.indexOf("No stash") !== -1) {
-                            //ignore
-                        } else {
-                            console.log("\n\ngit pull process failed! Usualy there is a merge issue. Please resolve conflicts and try again.\n\n");
-                            callback(err);
-                            return;
-                        }
+                        callback(err, `Finished update action on dependency ${dependency.name}`);
                     }
-                    callback(err, `Finished update action on dependency ${dependency.name}`);
-                }
-            });
+                })
+            })
             //throw `Destination path (target) ${target} already exists and is not an empty directory.`;
         } else {
 
@@ -463,6 +469,9 @@ function ActionsRegistry() {
         }
 
         optionsCmd += commitNo;
+        if (optionsCmd !== commitNo) {
+            console.log(`Extra options detected! Shallow clone mechanism implemetation does not have use for them: ${{optionsCmd}}`);
+        }
 
         remote = _parseRemoteHttpUrl(remote, credentials);
 
@@ -696,7 +705,7 @@ function ActionsRegistry() {
         options.overwrite = !!options.overwrite;
 
         console.log("Start copying " + src + " to folder " + action.target);
-        try{
+        try {
             fsExt.copy(src, action.target, options, (err, ...args) => {
                 if (err && options.ignoreErrors) {
                     console.log(err);
@@ -704,11 +713,11 @@ function ActionsRegistry() {
                 }
                 callback(err, ...args);
             });
-        }catch(err){
-            if(options.ignoreErrors){
+        } catch (err) {
+            if (options.ignoreErrors) {
                 console.log("Ignored according to options.ignoreErrors flag:", err);
                 callback(undefined);
-            }else{
+            } else {
                 throw err;
             }
         }
@@ -902,14 +911,14 @@ function ActionsRegistry() {
 
         const srcFilePath = fsExt.resolvePath(action.src);
         fs.readFile(srcFilePath, 'utf8', (error, fileContent) => {
-            if(error) {
+            if (error) {
                 return callback(error);
             }
 
             const newFileContent = replaceAll(fileContent, action.oldValue, action.newValue);
 
             fs.writeFile(srcFilePath, newFileContent, 'utf8', function (error) {
-                if(error) {
+                if (error) {
                     return callback(error);
                 }
                 callback();
