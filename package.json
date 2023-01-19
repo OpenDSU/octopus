@@ -1,7 +1,7 @@
 {
   "name": "octopus",
   "version": "1.0.0",
-  "description": "Octopus is a custom task runner used in PrivateSky to handle all deps and other tasks necessary in projects.",
+  "description": "Octopus is a custom task runner made to handle all deps and other tasks necessary in projects.",
   "main": "Runner.js",
   "directories": {
     "lib": "lib"
@@ -11,12 +11,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/privatesky/octopus.git"
+    "url": "git+ssh://git@github.com/opendsu/octopus.git"
   },
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/privatesky/octopus/issues"
+    "url": "https://github.com/opendsu/octopus/issues"
   },
-  "homepage": "https://github.com/privatesky/octopus#readme"
+  "homepage": "https://github.com/opendsu/octopus#readme"
 }

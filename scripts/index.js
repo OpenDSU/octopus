@@ -66,13 +66,6 @@ function readConfig() {
 		if (err.code === "MODULE_NOT_FOUND") {
 			console.log("Configuration file " + configFileName + " not found. Creating a new config object.");
 			config = createBasicConfig();
-			let privateSkyRepo;
-			console.log("Looking for PRIVATESKY_REPO_NAME as env variable. It can be used to change what PrivateSky repo will be user: psk-release or privatesky.");
-			if(typeof process.env.PRIVATESKY_REPO_NAME !== "undefined"){
-				privateSkyRepo = process.env.PRIVATESKY_REPO_NAME;
-			}else{
-				privateSkyRepo = "privatesky";
-			}
 		} else {
 			throw err;
 		}

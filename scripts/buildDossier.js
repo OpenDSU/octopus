@@ -61,9 +61,9 @@ const getCommands = function(data){
  * Flags:
  *  * bundles: sets the bundles path, ex:
  * <pre>
- *     --bundles=./../.../privatesky/bundles
+ *     --bundles=./../.../opendsu/bundles
  * </pre>
- * defaults to './../privatesky/bundles'
+ * defaults to './../opendsu/bundles'
  * * seed: sets the path for the seed file of the dossier being build, ex:
  * <pre>
  *     --seed=./../seed
