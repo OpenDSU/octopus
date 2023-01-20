@@ -32,7 +32,14 @@ if(fs.existsSync(fileArgDevel)){
 };
 
 const {spawn} = require("child_process");
-Object.assign(process.env, envJson);
+for(let prop in envJson){
+	let preventFlag = `PREVENT_${prop}`;
+	if(process.env[preventFlag] === "true"){
+		console.log(`Env variable ${prop} not set due to flag ${preventFlag} value: ${process.env[preventFlag]}`);
+		continue;
+	}
+	process.env[prop] = envJson[prop];
+}
 console.log("Environment was updated.");
 
 const spawn_cmd = args.join(" ");
