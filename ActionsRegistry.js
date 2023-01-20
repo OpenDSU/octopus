@@ -470,7 +470,7 @@ function ActionsRegistry() {
 
         optionsCmd += commitNo;
         if (optionsCmd !== commitNo) {
-            console.log(`Extra options detected! Shallow clone mechanism implemetation does not have use for them: ${{optionsCmd}}`);
+            console.log(`Extra options detected! Shallow clone mechanism implementation does not have use for them: ${optionsCmd}`);
         }
 
         remote = _parseRemoteHttpUrl(remote, credentials);
