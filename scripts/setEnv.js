@@ -45,4 +45,9 @@ console.log("Environment was updated.");
 const spawn_cmd = args.join(" ");
 
 console.log("Preparing to execute cmd", spawn_cmd);
-spawn(spawn_cmd, undefined, {shell: true, stdio: "inherit"});
+const ps = spawn(spawn_cmd, undefined, {shell: true, stdio: "inherit"});
+
+ps.on('close', (code) => {
+  process.exit(code);
+});
+
