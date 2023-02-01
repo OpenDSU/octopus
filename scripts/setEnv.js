@@ -31,7 +31,7 @@ if(fs.existsSync(fileArgDevel)){
 	console.log("Running in STABLE (FREEZED) mode");
 };
 
-const {spawn} = require("child_process");
+const {spawnSync} = require("child_process");
 for(let prop in envJson){
 	let preventFlag = `PREVENT_${prop}`;
 	if(process.env[preventFlag] === "true"){
@@ -45,9 +45,5 @@ console.log("Environment was updated.");
 const spawn_cmd = args.join(" ");
 
 console.log("Preparing to execute cmd", spawn_cmd);
-const ps = spawn(spawn_cmd, undefined, {shell: true, stdio: "inherit"});
-
-ps.on('close', (code) => {
-  process.exit(code);
-});
-
+let result = spawnSync(spawn_cmd, undefined, {shell: true, stdio: "inherit"});
+process.exit(result.status);
