@@ -357,6 +357,9 @@ function ActionsRegistry() {
             } else {
                 global.collectLog = true;
             }
+            if(typeof action.branch === "string") {
+                options.branch = action.branch;
+            }
 
             if (typeof action.commit !== "undefined") {
                 //Do a shallow clone (for a specific commit)
