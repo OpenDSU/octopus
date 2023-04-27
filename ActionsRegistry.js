@@ -254,6 +254,7 @@ function ActionsRegistry() {
                     return callback(undefined, "master");
                 }
                 let defaultBranchName = output.slice(output.indexOf("heads/")+6);
+		defaultBranchName = defaultBranchName.replace("\n", "");
                 return callback(undefined, defaultBranchName);
             });
         }
