@@ -241,6 +241,37 @@ function ActionsRegistry() {
         });
     };
 
+    function getDefaultBranchName(repoUrl, callback){
+        const getRemoteDefaultBranchCmd = `git ls-remote --quiet --symref ${repoUrl} HEAD | grep -Po "(?<=ref: refs/)[^\\t]*"`;
+        const getAllRemoteBranchesCmd = `git ls-remote --quiet --symref ${repoUrl} | grep -Po "(refs/heads/)[^\\t]*"`;
+
+        function getDefaultBranch(){
+            child_process.exec(getRemoteDefaultBranchCmd, function(err, output){
+                if(err){
+                    return callback(err);
+                }
+                if(output.indexOf("heads/")===-1){
+                    return callback(undefined, "master");
+                }
+                let defaultBranchName = output.slice(output.indexOf("heads/")+6);
+                return callback(undefined, defaultBranchName);
+            });
+        }
+
+        if(process.env.DEFAULT_BRANCH){
+            return child_process.exec(getAllRemoteBranchesCmd, function(err, output){
+                if(err){
+                    return callback(err);
+                }
+                if(output.indexOf(`refs/heads/${process.env.DEFAULT_BRANCH}`)!==-1){
+                    return callback(undefined, process.env.DEFAULT_BRANCH);
+                }
+                getDefaultBranch();
+            });
+        }
+        getDefaultBranch();
+    }
+
     actions.smartClone = function (action, dependency, callback) {
         let src = action.src || dependency.src;
 
@@ -344,44 +375,51 @@ function ActionsRegistry() {
             //throw `Destination path (target) ${target} already exists and is not an empty directory.`;
         } else {
 
-            let options = {
-                "depth": "1",
-                "branch": "master"
-            };
-            if (typeof action.options === "object") {
-                options = action.options;
-            }
+            getDefaultBranchName(action.src, function(err, branchName){
+                if(err){
+                    return callback(err);
+                }
 
-            if (typeof action.collectLog !== "undefined") {
-                global.collectLog = action.collectLog;
-            } else {
-                global.collectLog = true;
-            }
-            if(typeof action.branch === "string") {
-                options.branch = action.branch;
-            }
+                let options = {
+                    "depth": "1",
+                    "branch": branchName
+                };
 
-            if (typeof action.commit !== "undefined") {
-                //Do a shallow clone (for a specific commit)
-                options['commitNo'] = action.commit
+                if (typeof action.options === "object") {
+                    options = action.options;
+                }
 
-                _shallow_clone(src, target, options, dependency.credentials, function (err, res) {
-                    let msg;
-                    if (!err) {
-                        msg = `Finished shallow clone action on dependency ${dependency.name}`;
-                    }
-                    callback(err, msg);
-                });
-            } else {
-                //Do a normal clone
-                _clone(src, target, options, dependency.credentials, function (err, res) {
-                    let msg;
-                    if (!err) {
-                        msg = `Finished clone action on dependency ${dependency.name}`;
-                    }
-                    callback(err, msg);
-                });
-            }
+                if (typeof action.collectLog !== "undefined") {
+                    global.collectLog = action.collectLog;
+                } else {
+                    global.collectLog = true;
+                }
+                if(typeof action.branch === "string") {
+                    options.branch = action.branch;
+                }
+
+                if (typeof action.commit !== "undefined") {
+                    //Do a shallow clone (for a specific commit)
+                    options['commitNo'] = action.commit
+
+                    _shallow_clone(src, target, options, dependency.credentials, function (err, res) {
+                        let msg;
+                        if (!err) {
+                            msg = `Finished shallow clone action on dependency ${dependency.name}`;
+                        }
+                        callback(err, msg);
+                    });
+                } else {
+                    //Do a normal clone
+                    _clone(src, target, options, dependency.credentials, function (err, res) {
+                        let msg;
+                        if (!err) {
+                            msg = `Finished clone action on dependency ${dependency.name}`;
+                        }
+                        callback(err, msg);
+                    });
+                }
+            });
         }
     };
 
