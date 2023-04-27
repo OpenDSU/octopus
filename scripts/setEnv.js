@@ -25,7 +25,21 @@ try{
 let fileArgDevel = "./env.json.devel";
 let fs = require("fs");
 if(fs.existsSync(fileArgDevel)){
-	envJson["DEV"]= true;
+	let ENV = fs.readFileSync(fileArgDevel);
+	ENV = ENV.toString();
+	if(ENV.indexOf("This file indicates") === 0){
+		console.log(`${fileArgDevel} file seems to be in the old format`);
+		envJson["DEV"] = true;
+	}else{
+		try{
+			ENV = JSON.parse(ENV);
+			Object.assign(envJson, ENV);
+			delete envJson.COMMENT;
+		}catch(err){
+			console.error(err);
+			process.exit(1);
+		}
+	}
 	console.log("Running in DEVELOPMENT mode");
 } else {
 	console.log("Running in STABLE (FREEZED) mode");
