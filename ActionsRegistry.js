@@ -375,7 +375,7 @@ function ActionsRegistry() {
             //throw `Destination path (target) ${target} already exists and is not an empty directory.`;
         } else {
 
-            getDefaultBranchName(action.src, function(err, branchName){
+            getDefaultBranchName(dependency.src, function(err, branchName){
                 if(err){
                     return callback(err);
                 }
