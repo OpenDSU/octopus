@@ -253,7 +253,7 @@ function ActionsRegistry() {
                 if(output.indexOf("heads/")===-1){
                     return callback(undefined, "master");
                 }
-                const regex = /ref: refs\/heads\/(.*)  HEAD\n/m;
+                const regex = /ref: refs\/heads\/(.*)\tHEAD\n/m;
                 let defaultBranchName = output.match(regex)[1];
                 return callback(undefined, defaultBranchName);
             });
