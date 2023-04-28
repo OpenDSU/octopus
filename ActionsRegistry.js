@@ -242,8 +242,8 @@ function ActionsRegistry() {
     };
 
     function getDefaultBranchName(repoUrl, callback){
-        const getRemoteDefaultBranchCmd = `git ls-remote --quiet --symref ${repoUrl} HEAD | grep -Po "(?<=ref: refs/)[^\\t]*"`;
-        const getAllRemoteBranchesCmd = `git ls-remote --quiet --symref ${repoUrl} | grep -Po "(refs/heads/)[^\\t]*"`;
+        const getRemoteDefaultBranchCmd = `git ls-remote --quiet --symref ${repoUrl} HEAD`;
+        const getAllRemoteBranchesCmd = `git ls-remote --quiet --symref ${repoUrl} refs/heads/*`;
 
         function getDefaultBranch(){
             child_process.exec(getRemoteDefaultBranchCmd, function(err, output){
@@ -253,8 +253,8 @@ function ActionsRegistry() {
                 if(output.indexOf("heads/")===-1){
                     return callback(undefined, "master");
                 }
-                let defaultBranchName = output.slice(output.indexOf("heads/")+6);
-		defaultBranchName = defaultBranchName.replace("\n", "");
+                const regex = /ref: refs\/heads\/(.*)  HEAD\n/m;
+                let defaultBranchName = output.match(regex)[1];
                 return callback(undefined, defaultBranchName);
             });
         }
@@ -264,7 +264,7 @@ function ActionsRegistry() {
                 if(err){
                     return callback(err);
                 }
-                if(output.indexOf(`refs/heads/${process.env.DEFAULT_BRANCH}`)!==-1){
+                if(output.indexOf(`refs/heads/${process.env.DEFAULT_BRANCH}`) !== -1){
                     return callback(undefined, process.env.DEFAULT_BRANCH);
                 }
                 getDefaultBranch();
