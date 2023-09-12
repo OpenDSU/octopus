@@ -1,4 +1,4 @@
-const DEFAULT_PSK_BUNDLES_PATH = "./../opendsu-sdk/psknode/bundles";
+const DEFAULT_PSK_BUNDLES_PATH = "./../opendsu-sdk/builds/output";
 
 const DEFAULT_BUILD_CONF_PATH = './bin/build.file';
 const DEFAULT_SEED_PATH = './seed';
