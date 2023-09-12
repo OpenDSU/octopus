@@ -1,4 +1,4 @@
-const DEFAULT_PSK_BUNDLES_PATH = "./../opendsu/psknode/bundles";
+const DEFAULT_PSK_BUNDLES_PATH = "./../opendsu/builds/output";
 
 const DEFAULT_DOMAIN_SEED_PATH = "./domain-seed";
 const DEFAULT_DOMAIN = "default";
@@ -117,7 +117,7 @@ const createAndMountAllContractDSUs = function (cfg, mainDSU, dsuTypeSSI, callba
  * <pre>
  *     --bundles=./../.../opendsu/bundles
  * </pre>
- * defaults to './../opendsu/psknode/bundles'
+ * defaults to './../opendsu/builds/output'
  * * dsu-type-ssi: sets the path for the seed file of the DSU type of the domain being build, ex:
  * <pre>
  *     --dsu-type-ssi=./../seed

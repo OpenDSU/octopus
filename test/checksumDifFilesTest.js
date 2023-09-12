@@ -1,4 +1,4 @@
-require("../../../psknode/bundles/pskruntime"); 
+require("../../../builds/output/pskruntime");
 const fsExt = require('../../../libraries/utils/FSExtension').fsExt;
 const assert = require("privatesky/modules/deployer/test/double-check").assert;
 

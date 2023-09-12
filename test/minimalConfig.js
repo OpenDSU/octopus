@@ -1,4 +1,4 @@
-require("../../../psknode/bundles/pskruntime");
+require("../../../builds/output/pskruntime");
 
 const deployer = require('../../../test/Deployer');
 const fsExt = require('../../../libraries/utils/FSExtension').fsExt;

@@ -1,5 +1,5 @@
 process.env.DEPLOYER_DEBUG = true;
-require("../../../psknode/bundles/pskruntime"); 
+require("../../../builds/output/pskruntime");
 var fs = require("fs");
 const fsExt = require('../../../libraries/utils/FSExtension').fsExt;
 const assert = require("privatesky/modules/deployer/test/double-check").assert;

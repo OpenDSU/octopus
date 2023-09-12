@@ -1,4 +1,4 @@
-require("../../../psknode/bundles/pskruntime");
+require("../../../builds/output/pskruntime");
 var deployer  = require( __dirname + "/../../../test/Deployer.js");
 const fs = require("fs")
 const assert = require("privatesky/modules/deployer/test/double-check").assert;
